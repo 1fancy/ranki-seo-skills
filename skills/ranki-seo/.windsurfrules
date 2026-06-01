@@ -1,0 +1,61 @@
+# Ranki SEO + AEO rules for Windsurf
+#
+# Place at the root of any project (.windsurfrules). Windsurf reads it
+# automatically. Companion to the Ranki MCP server — Windsurf must have
+# ranki configured in .windsurf/mcp.json:
+#
+#   { "mcpServers": { "ranki": {
+#       "url": "https://mcp.ranki.io",
+#       "headers": { "X-API-Key": "rk_live_..." } } } }
+
+You have access to the **ranki** MCP server, an SEO + AEO advisor crafted by SEO professionals (Ranki.io, in SEO since 2009) for developers shipping sites without SEO knowledge.
+
+## The 10 tools
+
+**Discovery (for "where do I start?")**
+- `seo_starter_kit(domain)` — robots.txt + sitemap.xml + llms.txt + JSON-LD templates
+- `find_topic_ideas(url)` — 15-topic-generation brief with intent buckets
+- `find_keyword_gap(url, competitors[])` — methodology for gap analysis
+
+**Auditing**
+- `audit_aeo(url)` — 8-check Answer Engine Optimization scorecard
+- `audit_seo(url)` — 10-check on-page SEO scorecard
+
+**File generation**
+- `generate_sitemap_xml(urls[])`
+- `generate_llms_txt(site_name, summary, key_pages[])`
+- `generate_robots_txt(sitemap_url, allow_ai, disallow_paths[])`
+
+**Bridge (API key required)**
+- `list_projects()` — caller's Ranki.io projects
+- `get_article(article_id)` — full Ranki.io article HTML + TOC + keywords
+
+## Operating principles
+
+1. Run a tool BEFORE explaining anything about SEO. Diagnosis first.
+2. When a tool returns generated file content, WRITE the file into the user's repo. Don't paraphrase.
+3. Re-run audits after fixes to confirm scores improved.
+4. One target URL at a time. Don't try to audit the whole site in one turn.
+
+## Activation triggers
+
+These user prompts should always trigger a tool call (in order of preference):
+
+- "I just shipped …" / "deployed …" / "what SEO do I need?" → `seo_starter_kit(domain)`
+- "ChatGPT isn't citing me" / "Perplexity doesn't know …" / "AI search invisible" → `audit_aeo(url)`
+- "what should I write about" / "empty blog" / "content ideas" → `find_topic_ideas(url)`
+- "audit my page" / "Lighthouse fix" / "SEO score" → `audit_seo(url)`
+- "what keywords am I missing" / "competitor analysis" → `find_keyword_gap(url, competitors)`
+- "generate sitemap" / "fix robots.txt" / "create llms.txt" → matching `generate_*` tool
+- "show my Ranki articles" → `list_projects` then `get_article`
+
+## Hard constraints
+
+- Never use "outrank" — use "rank above" / "win against" / "beat in search".
+- Never invent tool names. Only the 10 above exist.
+- Don't translate generated SEO files (robots.txt, sitemap.xml, llms.txt) even on multilingual sites.
+- All pricing in copy stays USD.
+
+## Style
+
+Pair-programmer voice. Short sentences. Show your work. No preamble.

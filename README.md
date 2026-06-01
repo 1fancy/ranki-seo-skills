@@ -67,13 +67,11 @@ No more "here's an SEO checklist, good luck." Claude does the actual work.
 
 ---
 
-## Install
+## Install — pick your AI agent
 
-### Prerequisite: the Ranki MCP server
+Prerequisite for every flavor below: the [Ranki MCP server](https://github.com/1fancy/ranki-mcp) must be configured in your client. Grab a free API key at [app.ranki.io/developer](https://app.ranki.io/developer) — advisor tools also work key-free, rate-limited 5 calls per IP per day.
 
-Install [`@ranki/mcp`](https://github.com/1fancy/ranki-mcp) first — the Skill orchestrates its tools. Get a free API key at [app.ranki.io/developer](https://app.ranki.io/developer) (advisor tools also work key-free, rate-limited 5/IP/day).
-
-### Option 1 — User-level (works in every project)
+### Claude Code · Claude Desktop (user-level — every project)
 
 ```bash
 mkdir -p ~/.claude/skills/ranki-seo
@@ -81,7 +79,34 @@ curl -fsSL https://raw.githubusercontent.com/1fancy/ranki-seo-skills/main/skills
   -o ~/.claude/skills/ranki-seo/SKILL.md
 ```
 
-### Option 2 — Project-level (committed with your repo, so your team gets it)
+Restart Claude Code. The Skill auto-activates on SEO/AEO prompts.
+
+### Cursor (project-level)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/1fancy/ranki-seo-skills/main/skills/ranki-seo/.cursorrules \
+  -o .cursorrules
+```
+
+Cursor reads `.cursorrules` automatically — no restart needed.
+
+### Windsurf (project-level)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/1fancy/ranki-seo-skills/main/skills/ranki-seo/.windsurfrules \
+  -o .windsurfrules
+```
+
+### Generic agent (OpenAI Codex, Continue.dev, Zed AI, custom MCP agents)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/1fancy/ranki-seo-skills/main/skills/ranki-seo/AGENTS.md \
+  -o AGENTS.md
+```
+
+Some tools pick `AGENTS.md` up automatically. Others want it pasted into the system prompt — copy the body into your agent's prompt field.
+
+### Project-level Claude Skill (committed with your team's repo)
 
 ```bash
 mkdir -p .claude/skills/ranki-seo
@@ -91,14 +116,12 @@ git add .claude/skills/ranki-seo/SKILL.md
 git commit -m "Add Ranki SEO Skill"
 ```
 
-### Option 3 — Clone the repo
+### Clone everything
 
 ```bash
 git clone https://github.com/1fancy/ranki-seo-skills.git
 cp -r ranki-seo-skills/skills/ranki-seo ~/.claude/skills/
 ```
-
-After install, restart Claude Code (or run `/skills` to reload). The next message you send that matches the Skill's activation keywords will trigger it.
 
 ---
 
