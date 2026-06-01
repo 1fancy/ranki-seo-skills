@@ -1,10 +1,26 @@
-# Ranki SEO Skills — for Claude Code & Claude Desktop
+# Ranki SEO Skills — make Claude your senior SEO + AEO consultant
 
-> **A pack of Claude Code Skills that turn your AI into a senior SEO + AEO consultant. Activates automatically when you mention SEO, AEO, sitemap, llms.txt, ranking, or "why isn't ChatGPT citing my docs?" — then orchestrates the [Ranki MCP](https://github.com/1fancy/ranki-mcp) tools to diagnose and fix your vibe-coded site.**
+> **A Claude Code Skill that auto-activates when you mention SEO, AEO, sitemap, `llms.txt`, ranking, or "why isn't ChatGPT citing my docs?" — and walks Claude through the full audit-diagnose-fix-verify loop using the [Ranki MCP](https://github.com/1fancy/ranki-mcp) tools.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Companion to ranki-mcp](https://img.shields.io/badge/companion%20to-ranki--mcp-orange)](https://github.com/1fancy/ranki-mcp)
 [![Live at ranki.io](https://img.shields.io/badge/docs-ranki.io%2Fdevelopers%2Fskill-black)](https://ranki.io/developers/skill)
+
+You already pay for Claude. This Skill turns that subscription into a senior SEO + AEO consultant that lives inside your IDE — without you having to learn what FAQPage JSON-LD is, why definitional intros matter for Perplexity citations, or how `llms.txt` is different from `robots.txt`.
+
+**One-line install.** **Zero new bills.** Works on every project you already have.
+
+```bash
+mkdir -p ~/.claude/skills/ranki-seo && \
+  curl -fsSL https://raw.githubusercontent.com/1fancy/ranki-seo-skills/main/skills/ranki-seo/SKILL.md \
+    -o ~/.claude/skills/ranki-seo/SKILL.md
+```
+
+Restart Claude Code, then say:
+
+> *"my SaaS at https://myapp.dev isn't showing up in ChatGPT — fix it"*
+
+Claude will diagnose using `audit_aeo` from the [Ranki MCP server](https://mcp.ranki.io), apply the failing checks directly to your repo files, re-run the audit, and confirm the score jumped from 38 to 88 in the same conversation.
 
 ---
 
