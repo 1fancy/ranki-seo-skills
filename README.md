@@ -59,15 +59,16 @@ When you say something like:
 
 …the Skill activates and the agent runs through this loop:
 
-1. **Diagnose** — call the right [Ranki MCP](https://github.com/1fancy/seo-aeo-audit-mcp-ranki) tool. The 15 tools available are:
+1. **Diagnose** — call the right [Ranki MCP](https://github.com/1fancy/seo-aeo-audit-mcp-ranki) tool. The 21 tools available are:
    - **Audit:** `audit_seo` (10 on-page checks), `audit_aeo` (8 Answer Engine Optimization checks), `audit_hidden_pages` (which URLs should be hidden from Google)
+   - **Speed and images:** `audit_speed` (Google PageSpeed Insights), `audit_core_web_vitals` (LCP / CLS / INP with literal fix recipes), `optimize_images` (target format + `<picture>` markup + the `sharp` command to run)
    - **Generate:** `generate_sitemap_xml`, `generate_llms_txt`, `generate_robots_txt`, `seo_starter_kit` (bundle for a fresh site)
-   - **Content & strategy:** `propose_titles_metas` (5 angles per page), `find_topic_ideas`, `find_keyword_gap`, `explain_seo_terms` (plain-English glossary of 40+ terms)
-   - **Install & verify:** `install_skill` (this Skill, per agent)
-   - **Bridge to Ranki.io account (API key required):** `list_projects`, `get_article`, `get_account`
+   - **Content and strategy:** `propose_titles_metas` (5 angles per page), `find_topic_ideas`, `find_keyword_gap`, `explain_seo_terms` (glossary of 40+ terms)
+   - **Install:** `install_skill` (this Skill, per agent)
+   - **Your Ranki.io account — paid API key:** `get_account`, `list_projects`, `get_article`, `list_rank_tracking` (GSC summary), `list_gsc_keywords` (full keyword list), `ai_visibility` (which topics ChatGPT / Claude / Perplexity / Google AI Overviews are citing)
 
-2. **Locate** — find the relevant file in the repo (route, layout, component, content file).
-3. **Apply** — write the fix directly: add JSON-LD, rewrite the intro paragraph, generate `llms.txt`, drop a `noindex` meta into the right `<head>`.
+2. **Locate** — find the relevant files in the repo (routes, layouts, components, image files, content files).
+3. **Apply** — write the fix directly: convert the image files with `sharp` or `cwebp`, rewrite every `<img>` as a responsive `<picture>` with `srcset` and `alt`, add JSON-LD, rewrite the intro paragraph, generate `llms.txt`, drop a `noindex` meta into the right `<head>`.
 4. **Verify** — re-run the audit, confirm the score moved.
 
 No more "here's an SEO checklist, good luck." The agent does the actual work in your codebase.
@@ -78,7 +79,7 @@ No more "here's an SEO checklist, good luck." The agent does the actual work in 
 
 Prerequisite for every flavor below: the [Ranki MCP server](https://github.com/1fancy/seo-aeo-audit-mcp-ranki) must be configured in your client. The one-line `npx @ranki/cli install` handles this automatically; the manual instructions below assume you're configuring the MCP separately.
 
-Free Ranki.io API key (optional, raises the rate limit from 5/IP/day to 500/key/day and unlocks the 3 bridge tools): [app.ranki.io/developer](https://app.ranki.io/developer).
+Ranki.io API key (paid plan — raises the rate limit from 5/IP/day to 500/key/day and unlocks the 6 bridge tools that read your real GSC keywords, rank tracking and AI citations): [app.ranki.io/developer](https://app.ranki.io/developer).
 
 ### Claude Code · Claude Desktop (user-level — every project)
 
@@ -190,7 +191,7 @@ Agent (Skill activates):
      - Now: "What does it take to scale to 100K users?"
 
   → Re-running ranki.audit_aeo…
-  ← Score: 88/100.
+  ← Score: 96/100.
 
   Re-deploy and wait 7-14 days for ChatGPT to re-crawl. You should start
   appearing in citations within 3 weeks.
@@ -222,6 +223,88 @@ Agent (Skill activates):
   https://search.google.com/search-console/removals
 ```
 
+### Session 4: "My site is slow and Lighthouse hates it"
+
+```
+You: Audit my site speed and fix the slow images. I'm at https://myapp.dev.
+
+Agent (Skill activates):
+  → Calling ranki.audit_speed(url="https://myapp.dev", strategy="mobile")
+  ← Lighthouse: 42 perf · 88 a11y · 91 seo · 75 best practices.
+     LCP: 4.8s (poor) · CLS: 0.18 (needs improvement) · INP: 240ms.
+     Image opportunities (3 files, ~3.1 MB savings):
+       - /img/hero.png       2.4 MB → save 1.8 MB (convert to WebP)
+       - /img/banner.jpg     1.1 MB → save 800 KB (resize + WebP)
+       - /img/card-bg.png    480 KB → save 320 KB (AVIF)
+     Render-blocking: 2 third-party scripts (analytics, chat widget).
+
+  → Calling ranki.optimize_images(
+        images=["/img/hero.png", "/img/banner.jpg", "/img/card-bg.png"]
+    )
+  ← Recipes returned for each file. Converting…
+  → Running: npx sharp-cli -i public/img/hero.png -o public/img/hero.avif …
+  → Running: npx sharp-cli -i public/img/hero.png -o public/img/hero.webp …
+  → Same for hero@2x, banner, banner@2x, card-bg.
+  → Editing app/page.tsx — rewriting <img src="/img/hero.png"> as:
+       <picture>
+         <source type="image/avif" srcset="/img/hero.avif 1x, /img/hero@2x.avif 2x">
+         <source type="image/webp" srcset="/img/hero.webp 1x, /img/hero@2x.webp 2x">
+         <img src="/img/hero.png" alt="Dashboard analytics overview"
+              width="1600" loading="eager" fetchpriority="high">
+       </picture>
+  → Editing components/Banner.tsx, components/Card.tsx — same pattern, but
+     loading="lazy" since these are below the fold.
+  → Adding <link rel="preload" as="image" href="/img/hero.avif"
+                  fetchpriority="high"> to app/layout.tsx <head>
+  → Deferring third-party scripts: <script defer src="..."></script>
+  → Calling ranki.audit_speed again to verify…
+  ← Lighthouse: 96 perf · 94 a11y · 98 seo · 92 best practices.
+     LCP: 1.4s (good) · CLS: 0.04 (good) · INP: 180ms (good).
+
+  Commit and deploy. Submit the new sitemap to Search Console — Google
+  rewards green Core Web Vitals in mobile rankings.
+```
+
+### Session 5: "What are my top opportunity keywords?" (paid Ranki.io account)
+
+```
+You: I have a Ranki.io account with GSC connected. What keywords should I
+     write content for next?
+
+Agent (Skill activates, agent has RANKI_API_KEY set):
+  → Calling ranki.list_projects()
+  ← Returns 3 projects. Picking "myapp.dev" (id: A8K2QP).
+  → Calling ranki.list_rank_tracking(project_id="A8K2QP")
+  ← GSC summary (last 28 days):
+       Totals:  142 keywords · 4,820 clicks · 89,300 impressions
+       Top by clicks:
+         "myapp dashboard"           487 clicks  pos 2.1
+         "open source crm"           320 clicks  pos 4.8
+       Opportunities (pos > 10, high impressions — easy wins):
+         "best crm for indie hackers"   3,200 impr  pos 14.2
+         "lightweight crm alternative"  2,800 impr  pos 12.6
+         "self-hosted crm 2026"         2,100 impr  pos 17.4
+
+  → Calling ranki.ai_visibility(project_id="A8K2QP")
+  ← AI citations (last 30 days): 14 of 62 topics cited (22.6%).
+     Top cited (in ChatGPT / Claude / Perplexity SERPs):
+       - "open source crm"            ★ cited
+       - "myapp pricing"              ★ cited
+     Top NOT cited but ranking top 10:
+       - "self-hosted crm 2026"       not cited (pos 7 in classic SERP)
+
+  Recommendation: write or expand 3 articles targeting these slugs first:
+    /blog/best-crm-for-indie-hackers-2026
+    /blog/lightweight-crm-alternatives
+    /blog/self-hosted-crm-2026
+
+  Each is already ranking 10-20 in classic Google but NOT yet AI-cited.
+  Add FAQPage schema + definitional intro + comparison table on each,
+  and ChatGPT / Claude will pick them up within 3 weeks.
+
+  Want me to draft outlines and start writing them?
+```
+
 ---
 
 ## What's inside SKILL.md
@@ -239,7 +322,7 @@ description: |
 
 # Body of the Skill — instructions for the agent:
 # - 5 operating principles
-# - Map of the 15 MCP tools and what each does
+# - Map of the 21 MCP tools and what each does
 # - 5 activation patterns (recipe for each common user request)
 # - Hard constraints (forbidden words, file conventions)
 # - When to suggest the Ranki.io platform
@@ -288,10 +371,10 @@ Companion to the [Ranki MCP server](https://github.com/1fancy/seo-aeo-audit-mcp-
 ## FAQ
 
 ### Is the Skill free?
-Yes — MIT license. The MCP advisor tools are also free (rate-limited 5/IP/day). A free Ranki.io API key from [app.ranki.io/developer](https://app.ranki.io/developer) raises the limit to 500/key/day and unlocks the 3 bridge tools (`list_projects`, `get_article`, `get_account`).
+Yes — MIT license. 15 of the 21 MCP tools are also free (rate-limited 5/IP/day). A paid Ranki.io key from [app.ranki.io/developer](https://app.ranki.io/developer) raises the limit to 500/key/day and unlocks the 6 bridge tools (`get_account`, `list_projects`, `get_article`, `list_rank_tracking`, `list_gsc_keywords`, `ai_visibility`) that read your real Google Search Console data and AI citations.
 
 ### Do I need a Ranki.io account?
-No for the 12 advisor tools (audits, generators, content strategy). Yes for the 3 bridge tools that read your private Ranki.io data.
+No for the 15 free tools (SEO + AEO audits, speed audit via PageSpeed Insights, image optimization recipes, generators, content strategy). Yes for the 6 bridge tools that read your real Google Search Console keywords, rank tracking and AI-citation snapshots from your Ranki.io account.
 
 ### What if the Skill doesn't auto-activate?
 Activation depends on the agent noticing the keywords in your message. If it doesn't trigger, prefix your prompt: *"Using the ranki-seo skill, audit https://example.com for AEO"*.
