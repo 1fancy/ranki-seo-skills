@@ -1,0 +1,15 @@
+# Never commit secrets
+.env
+.env.*
+*.pem
+*.key
+~/.claude/
+.claude/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
