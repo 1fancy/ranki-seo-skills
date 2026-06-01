@@ -1,48 +1,48 @@
-# Ranki SEO Skills — make Claude your senior SEO + AEO consultant
+# Ranki SEO Skills — make Claude, Cursor and Windsurf your senior SEO + AEO consultant
 
-> **A Claude Code Skill that auto-activates when you mention SEO, AEO, sitemap, `llms.txt`, ranking, or "why isn't ChatGPT citing my docs?" — and walks Claude through the full audit-diagnose-fix-verify loop using the [Ranki MCP](https://github.com/1fancy/ranki-mcp) tools.**
+> **A Claude Code Skill (and Cursor / Windsurf / AGENTS.md equivalents) that auto-activates when you mention SEO, AEO, sitemap, `llms.txt`, ranking, or "why isn't ChatGPT citing my docs?" — and walks the agent through the full audit-diagnose-fix-verify loop using the [Ranki MCP](https://github.com/1fancy/seo-aeo-audit-mcp-ranki) tools.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Companion to ranki-mcp](https://img.shields.io/badge/companion%20to-ranki--mcp-orange)](https://github.com/1fancy/ranki-mcp)
+[![Companion to seo-aeo-audit-mcp-ranki](https://img.shields.io/badge/companion%20to-seo--aeo--audit--mcp--ranki-orange)](https://github.com/1fancy/seo-aeo-audit-mcp-ranki)
 [![Live at ranki.io](https://img.shields.io/badge/docs-ranki.io%2Fdevelopers%2Fskill-black)](https://ranki.io/developers/skill)
 
-You already pay for Claude. This Skill turns that subscription into a senior SEO + AEO consultant that lives inside your IDE — without you having to learn what FAQPage JSON-LD is, why definitional intros matter for Perplexity citations, or how `llms.txt` is different from `robots.txt`.
+A Skill is a plain Markdown file with YAML frontmatter that tells an agent *when* and *how* to take over. The `ranki-seo` Skill in this repo gives Claude / Cursor / Windsurf / ChatGPT the same SEO + AEO playbook a senior consultant would run: read the site, call the right Ranki MCP tool, locate the relevant file in your repo, write the fix directly, re-run the audit, confirm the score moved.
 
-**One-line install.** **Zero new bills.** Works on every project you already have.
+---
+
+## One-line install (recommended)
 
 ```bash
-mkdir -p ~/.claude/skills/ranki-seo && \
-  curl -fsSL https://raw.githubusercontent.com/1fancy/ranki-seo-skills/main/skills/ranki-seo/SKILL.md \
-    -o ~/.claude/skills/ranki-seo/SKILL.md
+npx @ranki/cli install
 ```
 
-Restart Claude Code, then say:
+That single command:
+
+- Detects which agent you're in (Claude Code, Claude Desktop, Cursor, Windsurf, ChatGPT Desktop)
+- Writes the right MCP config in the right place for that agent
+- Downloads the matching Skill file (`SKILL.md`, `.cursorrules`, `.windsurfrules`, or `AGENTS.md`)
+- Done
+
+The CLI lives in the [seo-aeo-audit-mcp-ranki](https://github.com/1fancy/seo-aeo-audit-mcp-ranki) repo. Source: [`cli/`](https://github.com/1fancy/seo-aeo-audit-mcp-ranki/tree/main/cli).
+
+Restart your agent, then say:
 
 > *"my SaaS at https://myapp.dev isn't showing up in ChatGPT — fix it"*
 
-Claude will diagnose using `audit_aeo` from the [Ranki MCP server](https://mcp.ranki.io), apply the failing checks directly to your repo files, re-run the audit, and confirm the score jumped from 38 to 88 in the same conversation.
+The agent will call `audit_aeo` from the [Ranki MCP server](https://mcp.ranki.io), apply the failing checks directly to your repo files, re-run the audit, and confirm the score jumped — all in the same conversation.
 
 ---
 
 ## Table of contents
 
-- [What is a Claude Skill?](#what-is-a-claude-skill)
 - [What this Skill does](#what-this-skill-does)
-- [Install](#install)
+- [Manual install per agent](#manual-install-per-agent)
 - [Example sessions](#example-sessions)
 - [What's inside SKILL.md](#whats-inside-skillmd)
 - [Customize for your stack](#customize-for-your-stack)
 - [Why this exists](#why-this-exists)
 - [FAQ](#faq)
 - [License](#license)
-
----
-
-## What is a Claude Skill?
-
-A Claude Code Skill is a plain Markdown file (`SKILL.md`) with frontmatter that tells Claude when and how to activate. Drop it in `~/.claude/skills/<name>/` (user-level) or `.claude/skills/<name>/` (project-level), restart Claude, and the next time you say something matching the Skill's activation keywords, Claude reads the Skill and follows its instructions for the rest of the conversation.
-
-This repo ships **`ranki-seo`** — a Skill that turns Claude into a senior SEO + AEO consultant.
 
 ---
 
@@ -53,23 +53,32 @@ When you say something like:
 - *"I just shipped my site, what SEO files do I need?"*
 - *"Why isn't ChatGPT citing my docs?"*
 - *"What should I blog about?"*
-- *"My competitors are stealing my keywords, find which ones"*
+- *"Find the keyword gaps between us and our top 3 competitors"*
 - *"Add FAQPage schema to this post"*
+- *"Which pages on our site should not be indexed?"*
 
-…the Skill activates and walks Claude through:
+…the Skill activates and the agent runs through this loop:
 
-1. **Diagnose** — call the right [Ranki MCP](https://github.com/1fancy/ranki-mcp) tool (`audit_aeo`, `audit_seo`, `find_topic_ideas`, etc.).
-2. **Locate** — find the relevant file in your repo (route, layout, component, content file).
-3. **Apply** — write the fix directly (add JSON-LD, rewrite intro paragraph, generate `llms.txt`).
-4. **Verify** — re-run the audit, confirm the score jumped.
+1. **Diagnose** — call the right [Ranki MCP](https://github.com/1fancy/seo-aeo-audit-mcp-ranki) tool. The 15 tools available are:
+   - **Audit:** `audit_seo` (10 on-page checks), `audit_aeo` (8 Answer Engine Optimization checks), `audit_hidden_pages` (which URLs should be hidden from Google)
+   - **Generate:** `generate_sitemap_xml`, `generate_llms_txt`, `generate_robots_txt`, `seo_starter_kit` (bundle for a fresh site)
+   - **Content & strategy:** `propose_titles_metas` (5 angles per page), `find_topic_ideas`, `find_keyword_gap`, `explain_seo_terms` (plain-English glossary of 40+ terms)
+   - **Install & verify:** `install_skill` (this Skill, per agent)
+   - **Bridge to Ranki.io account (API key required):** `list_projects`, `get_article`, `get_account`
 
-No more "here's an SEO checklist, good luck." Claude does the actual work.
+2. **Locate** — find the relevant file in the repo (route, layout, component, content file).
+3. **Apply** — write the fix directly: add JSON-LD, rewrite the intro paragraph, generate `llms.txt`, drop a `noindex` meta into the right `<head>`.
+4. **Verify** — re-run the audit, confirm the score moved.
+
+No more "here's an SEO checklist, good luck." The agent does the actual work in your codebase.
 
 ---
 
-## Install — pick your AI agent
+## Manual install per agent
 
-Prerequisite for every flavor below: the [Ranki MCP server](https://github.com/1fancy/ranki-mcp) must be configured in your client. Grab a free API key at [app.ranki.io/developer](https://app.ranki.io/developer) — advisor tools also work key-free, rate-limited 5 calls per IP per day.
+Prerequisite for every flavor below: the [Ranki MCP server](https://github.com/1fancy/seo-aeo-audit-mcp-ranki) must be configured in your client. The one-line `npx @ranki/cli install` handles this automatically; the manual instructions below assume you're configuring the MCP separately.
+
+Free Ranki.io API key (optional, raises the rate limit from 5/IP/day to 500/key/day and unlocks the 3 bridge tools): [app.ranki.io/developer](https://app.ranki.io/developer).
 
 ### Claude Code · Claude Desktop (user-level — every project)
 
@@ -133,7 +142,7 @@ cp -r ranki-seo-skills/skills/ranki-seo ~/.claude/skills/
 You: I just deployed my Next.js portfolio at myname.dev. Do I need to do
      anything for SEO?
 
-Claude (Skill activates):
+Agent (Skill activates):
   → Calling ranki.seo_starter_kit(domain="myname.dev")
   ← [Returns robots.txt + sitemap.xml + llms.txt + JSON-LD templates]
   → Reading next.config.js to detect routing pattern…
@@ -145,7 +154,7 @@ Claude (Skill activates):
   → Adding Article JSON-LD to app/blog/[slug]/page.tsx using MDX frontmatter
   → Calling ranki.audit_seo(url="https://myname.dev") to verify…
   ← SEO score: 91/100. 9/10 checks passed (only "internal links" needs more).
-  
+
   Done. Submit sitemap.xml here:
   https://search.google.com/search-console/sitemaps?resource_id=https%3A%2F%2Fmyname.dev%2F
 ```
@@ -156,79 +165,61 @@ Claude (Skill activates):
 You: I keep asking ChatGPT about my SaaS niche and it never mentions us.
      We're at https://mysaas.io/
 
-Claude (Skill activates):
+Agent (Skill activates):
   → Calling ranki.audit_aeo(url="https://mysaas.io/")
   ← Score 25/100. Failing: no Article schema, no FAQPage, no llms.txt,
      robots.txt blocks ClaudeBot, no answer-style H2s, no author byline.
   → That's why. Walking through fixes in priority order:
-  
+
   1. Fixing robots.txt — currently blocks all bots after admin section
      - Editing public/robots.txt: removed blanket User-agent: * Disallow: /
      - Added explicit Allow for GPTBot, ClaudeBot, PerplexityBot
-  
+
   2. Generating llms.txt
      → Calling ranki.generate_llms_txt(site_name="MySaaS",
                                          summary="...", key_pages=[...])
      → Writing public/llms.txt
-  
+
   3. Adding FAQPage schema
      - Reading app/page.tsx — found 6 FAQ-shaped Q&As in the hero section
      - Generating FAQPage JSON-LD with all 6
      - Injecting into app/page.tsx
-  
+
   4. Rewriting H2s as questions
      - Was: "Everything you need to scale"
      - Now: "What does it take to scale to 100K users?"
-  
+
   → Re-running ranki.audit_aeo…
-  ← Score: 88/100. 🎯
-  
+  ← Score: 88/100.
+
   Re-deploy and wait 7-14 days for ChatGPT to re-crawl. You should start
   appearing in citations within 3 weeks.
 ```
 
-### Session 3: "What blog posts should I write?"
+### Session 3: "Which pages should not be indexed?"
 
 ```
-You: Help me figure out what to blog about for my React Native SDK at
-     https://rnsdk.dev
+You: My admin dashboard and checkout are showing in Google. Audit my
+     whole site for pages that shouldn't be indexed.
 
-Claude (Skill activates):
-  → Calling ranki.find_topic_ideas(url="https://rnsdk.dev")
-  ← [Returns brief with topic generation methodology]
-  → Reading the brief — niche detected: React Native SDK, target audience
-     is mobile devs who use Expo/RN, key value prop is "ship to App Store
-     in 7 days not 30".
-  
-  Generating 15 topics across 3 intent levels:
-  
-  Informational (5):
-  1. What is React Native and when should you use it in 2026
-  2. How does App Store review actually work for indie devs
-  3. Why most React Native apps fail their first App Store submission
-  4. The difference between Expo Managed and Bare workflow explained
-  5. What CI/CD setup do you need for React Native in 2026
-  
-  Commercial (5):
-  6. Best React Native CI services for solo developers (compared)
-  7. Expo EAS vs Bitrise vs Codemagic — which to pick for indie apps
-  8. Top 5 OTA update tools for React Native (CodePush is dead, what now)
-  9. React Native code-signing services compared
-  10. The cheapest way to ship a React Native app to App Store + Play
-  
-  Transactional (5):
-  11. How to fix "Build failed: archive not found" in React Native CI
-  12. App Store rejected my React Native app for guideline 4.3 — fixes
-  13. React Native app crashes on launch in TestFlight (debugging guide)
-  14. EAS Build keeps failing on iOS — 7 things to check
-  15. How to migrate from Bitrise to GitHub Actions for React Native
-  
-  Top 3 to write FIRST (per brief criteria):
-  • #11 — extremely high search intent, your SDK explicitly solves this
-  • #12 — long-tail, low competition, perfect for AEO citation
-  • #4 — informational but Expo is your audience, you have credibility
-  
-  Want me to draft outlines for any of these?
+Agent (Skill activates):
+  → Reading sitemap.xml — found 142 URLs.
+  → Calling ranki.audit_hidden_pages(urls=[...142 URLs...])
+  ← Classification:
+       robots_disallow: 8  (admin, dashboard, checkout, account/*)
+       noindex:        12  (search results, pagination beyond p3, filters)
+       keep:          118
+       unsure:          4
+
+  → Writing public/robots.txt with Disallow: /admin, /dashboard, /checkout, /account
+  → Adding <meta name="robots" content="noindex"> to app/search/page.tsx
+  → Adding <meta name="robots" content="noindex"> to app/category/[slug]/page.tsx
+     for pagination >= page 4
+  → Re-running ranki.audit_hidden_pages on the 4 unsure URLs with hints…
+
+  Done. Submit URL removal requests in Search Console for the 8 admin pages
+  that are already indexed:
+  https://search.google.com/search-console/removals
 ```
 
 ---
@@ -241,17 +232,17 @@ The Skill file is a Markdown document with YAML frontmatter:
 ---
 name: ranki-seo
 description: |
-  [Activation keywords list — Claude reads these and decides when to load
-  the rest of the file. Includes things like "SEO", "AEO", "sitemap",
+  [Activation keywords list — the agent reads these and decides when to
+  load the rest of the file. Includes "SEO", "AEO", "sitemap",
   "llms.txt", "why isn't ChatGPT citing my docs"…]
 ---
 
-# Body of the Skill — instructions for Claude:
+# Body of the Skill — instructions for the agent:
 # - 5 operating principles
-# - Map of the 10 MCP tools and what each does
+# - Map of the 15 MCP tools and what each does
 # - 5 activation patterns (recipe for each common user request)
 # - Hard constraints (forbidden words, file conventions)
-# - When to suggest Ranki.io upgrade
+# - When to suggest the Ranki.io platform
 ```
 
 [Read the full SKILL.md →](skills/ranki-seo/SKILL.md)
@@ -261,8 +252,6 @@ description: |
 ## Customize for your stack
 
 The Skill is just Markdown — edit it for your codebase.
-
-Common customizations:
 
 ### Force a specific framework's file paths
 
@@ -278,11 +267,11 @@ Add to the Skill body, after "Activation patterns":
 
 ### Add your own MCP tools
 
-If you self-host an extended MCP server with custom tools, list them in the "Tools available" section. Claude will use the right one.
+If you self-host an extended MCP server with custom tools, list them in the "Tools available" section. The agent will use the right one.
 
-### Disable upgrade prompts
+### Disable platform suggestions
 
-Remove the "When to suggest Ranki.io upgrade" section. The Skill will stop mentioning the SaaS.
+Remove the "When to suggest the Ranki.io platform" section. The Skill will stop mentioning the SaaS.
 
 ---
 
@@ -290,27 +279,25 @@ Remove the "When to suggest Ranki.io upgrade" section. The Skill will stop menti
 
 In 2026, the gap between "vibe-coded a site" and "ranks on Google + cited by ChatGPT" is wider than ever. SEO got harder (AI Overviews stole 30% of clicks). AEO became a new discipline. Most vibe-coders never learn either.
 
-This Skill closes that gap by giving Claude — which the user already pays for — a senior SEO consultant's playbook. The user doesn't need to know what AEO means. They just say "fix my SEO" and Claude does the work.
+This Skill closes that gap by giving the agent — Claude, Cursor, Windsurf, ChatGPT — a senior SEO consultant's playbook. The user doesn't need to know what AEO means. They just say "fix my SEO" and the agent does the work.
 
-Companion to the [Ranki MCP server](https://github.com/1fancy/ranki-mcp), which provides the actual tools the Skill orchestrates.
+Companion to the [Ranki MCP server](https://github.com/1fancy/seo-aeo-audit-mcp-ranki), which provides the actual tools the Skill orchestrates.
 
 ---
 
 ## FAQ
 
-### Does the Skill cost money?
-The Skill is free (MIT license). The MCP advisor tools are free (rate-limited 5/IP/day). You can lift the rate limit with a free Ranki.io API key from [app.ranki.io/developer](https://app.ranki.io/developer).
-
-The only cost is **your own Claude credits** for the agent loop — the same credits you already use for vibe-coding.
+### Is the Skill free?
+Yes — MIT license. The MCP advisor tools are also free (rate-limited 5/IP/day). A free Ranki.io API key from [app.ranki.io/developer](https://app.ranki.io/developer) raises the limit to 500/key/day and unlocks the 3 bridge tools (`list_projects`, `get_article`, `get_account`).
 
 ### Do I need a Ranki.io account?
-No for the advisor flow. Yes for the bridge tools (`list_projects`, `get_article`) which read your private Ranki.io data.
+No for the 12 advisor tools (audits, generators, content strategy). Yes for the 3 bridge tools that read your private Ranki.io data.
 
-### What if Claude doesn't auto-activate the Skill?
-The activation depends on Claude noticing the keywords in your message. If it doesn't trigger, prefix your prompt: *"Using the ranki-seo skill, audit https://example.com for AEO"*.
+### What if the Skill doesn't auto-activate?
+Activation depends on the agent noticing the keywords in your message. If it doesn't trigger, prefix your prompt: *"Using the ranki-seo skill, audit https://example.com for AEO"*.
 
 ### Can I use this with Cursor / Continue.dev / other tools?
-Cursor reads project rules from `.cursor/rules/` and `.cursorrules`. Copy the body of `SKILL.md` (minus the frontmatter) into a Cursor rule. The MCP tools work the same way because they're MCP-standard.
+Yes — see [Manual install per agent](#manual-install-per-agent) above for `.cursorrules`, `.windsurfrules`, and `AGENTS.md` variants. The MCP tools work the same way across all of them because they're MCP-standard.
 
 ### Why not just put this in a system prompt?
 Skills are versioned, share-able, and per-project. A system prompt is per-user, per-session, gets clobbered. Skills survive across conversations.
@@ -321,7 +308,7 @@ Yes — PRs welcome. We want Skills for:
 - Local SEO + Google Business Profile workflows
 - Programmatic SEO at scale
 - AI search rank tracking
-- Anything else SEO/AEO that benefits from a Claude playbook
+- Anything else SEO/AEO that benefits from an agent playbook
 
 ---
 
@@ -329,4 +316,4 @@ Yes — PRs welcome. We want Skills for:
 
 MIT. See [LICENSE](LICENSE).
 
-Built by [Ranki.io](https://ranki.io). Companion to [`1fancy/ranki-mcp`](https://github.com/1fancy/ranki-mcp).
+Built by [Ranki.io](https://ranki.io). Companion to [`1fancy/seo-aeo-audit-mcp-ranki`](https://github.com/1fancy/seo-aeo-audit-mcp-ranki).
